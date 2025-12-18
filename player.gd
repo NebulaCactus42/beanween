@@ -33,11 +33,22 @@ func _process(_delta):
 		var charge_ratio = throw_charge / max_throw_charge
 		crosshair.color = Color(1, 1 - charge_ratio, 0) # Red to Yellow
 
-		# Change crosshair size based on charge
-		var base_size = 4.0
-		var max_size = 12.0
+		# Change crosshair size based on charge (using margin properties)
+		var base_size = 2.0
+		var max_size = 6.0
 		var current_size = base_size + (max_size - base_size) * charge_ratio
-		crosshair.rect_min_size = Vector2(current_size, current_size)
+		crosshair.margin_left = -current_size
+		crosshair.margin_right = -current_size
+		crosshair.margin_top = -current_size
+		crosshair.margin_bottom = -current_size
+	else:
+		# Reset crosshair to normal when not charging
+		if !ray.is_colliding():  # Only reset if not aiming at something
+			crosshair.color = Color(1, 1, 1, 0.8)  # Default white
+			crosshair.margin_left = -2.0
+			crosshair.margin_right = -2.0
+			crosshair.margin_top = -2.0
+			crosshair.margin_bottom = -2.0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
