@@ -1,1 +1,1 @@
-Fixed ImmediateMesh API usage for trajectory prediction
+Fixed trajectory mesh creation using proper MeshInstance3D structure

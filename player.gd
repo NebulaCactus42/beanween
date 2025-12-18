@@ -202,9 +202,14 @@ func update_trajectory_prediction():
 
 	# Create or update trajectory line
 	if trajectory_line == null:
-		# Create a new ImmediateMesh for the trajectory
+		# Create a MeshInstance3D to hold the ImmediateMesh
+		var mesh_instance = MeshInstance3D.new()
+		get_tree().root.add_child(mesh_instance)
+		mesh_instance.visible = true
+
+		# Create and assign ImmediateMesh
 		var immediate_mesh = ImmediateMesh.new()
-		get_tree().root.add_child(immediate_mesh)
+		mesh_instance.mesh = immediate_mesh
 		trajectory_line = immediate_mesh
 
 	# Draw the trajectory line using ImmediateMesh
@@ -223,7 +228,11 @@ func update_trajectory_prediction():
 
 func clear_trajectory():
 	if trajectory_line:
-		trajectory_line.queue_free()
+		# Find and remove the MeshInstance3D parent
+		for child in get_tree().root.get_children():
+			if child is MeshInstance3D and child.mesh == trajectory_line:
+				child.queue_free()
+				break
 		trajectory_line = null
 	trajectory_points.clear()
 
