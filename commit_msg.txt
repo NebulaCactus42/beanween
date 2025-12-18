@@ -1,1 +1,1 @@
-Fixed void return value issue with surface_begin method
+Fixed crosshair scaling using proper scale property instead of grow properties
