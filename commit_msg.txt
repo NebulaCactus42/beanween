@@ -1,1 +1,1 @@
-Fixed crosshair visual feedback using correct ColorRect grow properties
+Added throw trajectory prediction with physics-based arc visualization

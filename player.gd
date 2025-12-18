@@ -21,6 +21,11 @@ var throw_charge = 0.0
 var max_throw_charge = 2.0
 var throw_charge_rate = 1.5
 
+# Trajectory prediction variables
+var trajectory_points = []
+var trajectory_line = null
+var gravity = -9.8
+
 func _process(_delta):
 	if ray.is_colliding():
 		crosshair.color = Color(1, 0, 0) # Red when looking at something
@@ -88,6 +93,12 @@ func _physics_process(delta):
 		if throw_charge > max_throw_charge:
 			throw_charge = max_throw_charge
 
+		# Update trajectory prediction
+		update_trajectory_prediction()
+	else:
+		# Clear trajectory when not charging
+		clear_trajectory()
+
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
@@ -137,6 +148,85 @@ func pick_up_object():
 			# Reset any residual forces
 			held_object.linear_velocity = Vector3.ZERO
 			held_object.angular_velocity = Vector3.ZERO
+
+func update_trajectory_prediction():
+	# Clear existing trajectory
+	clear_trajectory()
+
+	if !held_object:
+		return
+
+	# Calculate throw force
+	var throw_force = 10.0 * throw_charge
+	if throw_force < 5.0:
+		throw_force = 5.0
+
+	# Get starting position (hand position)
+	var start_pos = hand.global_position
+
+	# Get throw direction
+	var throw_direction = -head.global_transform.basis.z
+
+	# Calculate initial velocity
+	var initial_velocity = throw_direction * throw_force
+	initial_velocity.y = throw_force * 0.3  # Upward component
+
+	# Simulate trajectory with physics
+	var current_pos = start_pos
+	var current_velocity = initial_velocity
+	var time_step = 0.05
+	var max_steps = 50
+
+	for i in range(max_steps):
+		# Apply gravity
+		current_velocity.y += gravity * time_step
+
+		# Calculate new position
+		var new_pos = current_pos + current_velocity * time_step
+
+		# Check if we hit the ground (simple plane check for now)
+		if new_pos.y < 0:
+			new_pos.y = 0
+			break
+
+		# Add point to trajectory
+		trajectory_points.append(new_pos)
+
+		# Prepare for next iteration
+		current_pos = new_pos
+		current_velocity = current_velocity
+
+		# Stop if velocity is very low
+		if current_velocity.length() < 0.1:
+			break
+
+	# Create or update trajectory line
+	if trajectory_line == null:
+		# Create a new ImmediateGeometry for the trajectory
+		var immediate_geometry = ImmediateGeometry.new()
+		get_tree().root.add_child(immediate_geometry)
+		trajectory_line = immediate_geometry
+
+	# Draw the trajectory line
+	trajectory_line.clear()
+	trajectory_line.begin(Mesh.PRIMITIVE_LINE_STRIP)
+
+	# Set color based on charge level
+	var charge_ratio = throw_charge / max_throw_charge
+	var line_color = Color(1, 1 - charge_ratio, 0)  # Red to Yellow
+
+	for point in trajectory_points:
+		trajectory_line.set_color(line_color)
+		trajectory_line.set_normal(Vector3.UP)
+		trajectory_line.add_vertex(point)
+
+	trajectory_line.end()
+
+func clear_trajectory():
+	if trajectory_line:
+		trajectory_line.queue_free()
+		trajectory_line = null
+	trajectory_points.clear()
 
 func drop_object_with_force():
 	if held_object:
