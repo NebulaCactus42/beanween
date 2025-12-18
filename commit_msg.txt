@@ -1,1 +1,1 @@
-Fixed ImmediateMesh API usage with correct surface methods
+Current trajectory prediction implementation with proper ImmediateMesh API
