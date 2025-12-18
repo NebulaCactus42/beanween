@@ -184,9 +184,6 @@ func update_trajectory_prediction():
 
 	initial_velocity.y = throw_force * upward_factor
 
-	# Store the upward factor for trajectory visualization
-	camera_node.set_meta("upward_factor", upward_factor)
-
 	# Simulate trajectory with physics
 	var current_pos = start_pos
 	var current_velocity = initial_velocity
@@ -234,7 +231,13 @@ func update_trajectory_prediction():
 
 	# Set color based on charge level and throw type
 	var charge_ratio = throw_charge / max_throw_charge
-	# upward_factor is already declared above, just use it
+	# Get current vertical aim for real-time updates
+	var current_vertical_aim = camera_node.get_meta("vertical_aim_angle", camera_node.rotation.x)
+	var upward_factor = 0.3
+	if current_vertical_aim < 0:  # Aiming upward
+		upward_factor = 0.5
+	elif current_vertical_aim > 0:  # Aiming downward
+		upward_factor = 0.1
 
 	var line_color
 	if upward_factor >= 0.4:  # LOB (high upward factor)

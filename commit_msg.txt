@@ -1,1 +1,1 @@
-Fixed duplicate variable declaration in trajectory visualization
+Fixed trajectory prediction to follow vertical aim in real-time
