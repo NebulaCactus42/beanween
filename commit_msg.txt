@@ -1,1 +1,1 @@
-Fixed trajectory mesh creation using proper MeshInstance3D structure
+Fixed ImmediateMesh API usage with correct surface methods
