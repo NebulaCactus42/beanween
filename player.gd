@@ -214,7 +214,7 @@ func update_trajectory_prediction():
 
 	# Draw the trajectory line using ImmediateMesh
 	trajectory_line.clear_surfaces()
-	var surface_index = trajectory_line.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
+	trajectory_line.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 
 	# Set color based on charge level
 	var charge_ratio = throw_charge / max_throw_charge
