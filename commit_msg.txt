@@ -1,1 +1,1 @@
-Fixed trajectory to use direct camera rotation for real-time vertical aim
+Added TODO comment about trajectory aim refinement needed

@@ -154,6 +154,10 @@ func update_trajectory_prediction():
 	# Clear existing trajectory
 	clear_trajectory()
 
+	# TODO: Trajectory aim needs improvement - currently doesn't follow vertical mouse movement perfectly
+	# The trajectory updates but may need additional refinement for smooth real-time tracking
+=======
+
 	if !held_object:
 		return
 
