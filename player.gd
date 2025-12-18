@@ -15,11 +15,29 @@ var original_freeze_mode = RigidBody3D.FREEZE_MODE_KINEMATIC
 var original_collision_layer = 1
 var original_collision_mask = 1
 
+# Throw mechanics variables
+var is_charging_throw = false
+var throw_charge = 0.0
+var max_throw_charge = 2.0
+var throw_charge_rate = 1.5
+
 func _process(_delta):
 	if ray.is_colliding():
 		crosshair.color = Color(1, 0, 0) # Red when looking at something
 	else:
 		crosshair.color = Color(1, 1, 1, 0.8) # Default white
+
+	# Visual feedback for throw charging
+	if is_charging_throw:
+		# Change crosshair color based on charge level
+		var charge_ratio = throw_charge / max_throw_charge
+		crosshair.color = Color(1, 1 - charge_ratio, 0) # Red to Yellow
+
+		# Change crosshair size based on charge
+		var base_size = 4.0
+		var max_size = 12.0
+		var current_size = base_size + (max_size - base_size) * charge_ratio
+		crosshair.rect_min_size = Vector2(current_size, current_size)
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -30,15 +48,38 @@ func _unhandled_input(event):
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
 
-	if event.is_action_pressed("ui_select"): # Space or custom "Interact"
+	if event.is_action_pressed("ui_select"): # E key - Pick up/Drop
 		if held_object:
-			drop_object()
+			if is_charging_throw:
+				# Already charging, do nothing on press
+				pass
+			else:
+				# Start charging throw
+				is_charging_throw = true
+				throw_charge = 0.0
 		else:
+			# Not holding anything, pick up on press
 			pick_up_object()
+
+	elif event.is_action_released("ui_select"):
+		if is_charging_throw:
+			if held_object:
+				# Execute charged throw
+				drop_object_with_force()
+			else:
+				# Quick drop (tap E instead of holding)
+				drop_object()
+			is_charging_throw = false
 
 func _physics_process(delta):
 	if not is_on_floor():
 		velocity += get_gravity() * delta
+
+	# Charge throw while holding E key
+	if is_charging_throw and held_object:
+		throw_charge += throw_charge_rate * delta
+		if throw_charge > max_throw_charge:
+			throw_charge = max_throw_charge
 
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
@@ -89,6 +130,35 @@ func pick_up_object():
 			# Reset any residual forces
 			held_object.linear_velocity = Vector3.ZERO
 			held_object.angular_velocity = Vector3.ZERO
+
+func drop_object_with_force():
+	if held_object:
+		# Calculate throw force based on charge level
+		var throw_force = 10.0 * throw_charge
+		if throw_force < 5.0:  # Minimum throw force
+			throw_force = 5.0
+
+		# Restore original physics properties
+		held_object.mass = original_mass
+		held_object.freeze_mode = original_freeze_mode
+		held_object.sleeping = false
+		held_object.freeze = false
+
+		# Restore collision layers
+		held_object.collision_layer = original_collision_layer
+		held_object.collision_mask = original_collision_mask
+
+		held_object.reparent(get_tree().root)
+
+		# Apply impulse based on player's facing direction and charge level
+		var throw_direction = -head.global_transform.basis.z
+		held_object.apply_central_impulse(throw_direction * throw_force)
+
+		# Add some upward force for arc
+		held_object.apply_central_impulse(Vector3.UP * throw_force * 0.3)
+
+		held_object = null
+		throw_charge = 0.0
 
 func drop_object():
 	if held_object:
