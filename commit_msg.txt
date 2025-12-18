@@ -1,1 +1,1 @@
-Added throw trajectory prediction with physics-based arc visualization
+Fixed ImmediateMesh API usage for trajectory prediction

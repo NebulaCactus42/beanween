@@ -202,25 +202,24 @@ func update_trajectory_prediction():
 
 	# Create or update trajectory line
 	if trajectory_line == null:
-		# Create a new ImmediateGeometry for the trajectory
-		var immediate_geometry = ImmediateGeometry.new()
-		get_tree().root.add_child(immediate_geometry)
-		trajectory_line = immediate_geometry
+		# Create a new ImmediateMesh for the trajectory
+		var immediate_mesh = ImmediateMesh.new()
+		get_tree().root.add_child(immediate_mesh)
+		trajectory_line = immediate_mesh
 
-	# Draw the trajectory line
-	trajectory_line.clear()
-	trajectory_line.begin(Mesh.PRIMITIVE_LINE_STRIP)
+	# Draw the trajectory line using ImmediateMesh
+	var surface_tool = trajectory_line.create_tool()
+	surface_tool.begin(Mesh.PRIMITIVE_LINE_STRIP)
 
 	# Set color based on charge level
 	var charge_ratio = throw_charge / max_throw_charge
 	var line_color = Color(1, 1 - charge_ratio, 0)  # Red to Yellow
 
 	for point in trajectory_points:
-		trajectory_line.set_color(line_color)
-		trajectory_line.set_normal(Vector3.UP)
-		trajectory_line.add_vertex(point)
+		surface_tool.set_color(line_color)
+		surface_tool.add_vertex(point)
 
-	trajectory_line.end()
+	surface_tool.commit()
 
 func clear_trajectory():
 	if trajectory_line:
