@@ -233,11 +233,13 @@ func update_trajectory_prediction():
 	var charge_ratio = throw_charge / max_throw_charge
 	# Get current vertical aim for real-time updates
 	var current_vertical_aim = camera_node.get_meta("vertical_aim_angle", camera_node.rotation.x)
-	var upward_factor = 0.3
+	# Recalculate upward_factor based on current aim
 	if current_vertical_aim < 0:  # Aiming upward
 		upward_factor = 0.5
 	elif current_vertical_aim > 0:  # Aiming downward
 		upward_factor = 0.1
+	else:
+		upward_factor = 0.3
 
 	var line_color
 	if upward_factor >= 0.4:  # LOB (high upward factor)
