@@ -1,1 +1,1 @@
-Fixed duplicate variable by reusing existing upward_factor
+Fixed trajectory to use direct camera rotation for real-time vertical aim

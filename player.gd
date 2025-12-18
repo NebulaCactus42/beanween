@@ -169,8 +169,8 @@ func update_trajectory_prediction():
 	var camera_node = $"Head/Camera3D"
 	var throw_direction = -camera_node.global_transform.basis.z
 
-	# Get vertical aim angle (stored in meta)
-	var vertical_aim = camera_node.get_meta("vertical_aim_angle", camera_node.rotation.x)
+	# Get vertical aim angle directly from camera (real-time)
+	var vertical_aim = camera_node.rotation.x
 
 	# Calculate initial velocity with vertical aim influence
 	var initial_velocity = throw_direction * throw_force
@@ -232,7 +232,7 @@ func update_trajectory_prediction():
 	# Set color based on charge level and throw type
 	var charge_ratio = throw_charge / max_throw_charge
 	# Get current vertical aim for real-time updates
-	var current_vertical_aim = camera_node.get_meta("vertical_aim_angle", camera_node.rotation.x)
+	var current_vertical_aim = camera_node.rotation.x
 	# Recalculate upward_factor based on current aim
 	if current_vertical_aim < 0:  # Aiming upward
 		upward_factor = 0.5
