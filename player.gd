@@ -58,6 +58,9 @@ func _unhandled_input(event):
 		camera.rotate_x(-event.relative.y * SENSITIVITY)
 		camera.rotation.x = clamp(camera.rotation.x, deg_to_rad(-80), deg_to_rad(80))
 
+		# Store vertical aim angle for throwing mechanics
+		$"Head/Camera3D".set_meta("vertical_aim_angle", camera.rotation.x)
+
 	if event.is_action_pressed("ui_select"): # E key - Pick up/Drop
 		if held_object:
 			if is_charging_throw:
@@ -162,12 +165,24 @@ func update_trajectory_prediction():
 	# Get starting position (hand position)
 	var start_pos = hand.global_position
 
-	# Get throw direction
-	var throw_direction = -head.global_transform.basis.z
+	# Get throw direction based on camera aim (includes vertical component)
+	var camera_node = $"Head/Camera3D"
+	var throw_direction = -camera_node.global_transform.basis.z
 
-	# Calculate initial velocity
+	# Get vertical aim angle (stored in meta)
+	var vertical_aim = camera_node.get_meta("vertical_aim_angle", camera_node.rotation.x)
+
+	# Calculate initial velocity with vertical aim influence
 	var initial_velocity = throw_direction * throw_force
-	initial_velocity.y = throw_force * 0.3  # Upward component
+
+	# Adjust upward component based on vertical aim
+	var upward_factor = 0.3
+	if vertical_aim < 0:  # Aiming upward
+		upward_factor = 0.5  # More upward force for lobbing
+	elif vertical_aim > 0:  # Aiming downward
+		upward_factor = 0.1  # Less upward force for tossing
+
+	initial_velocity.y = throw_force * upward_factor
 
 	# Simulate trajectory with physics
 	var current_pos = start_pos
@@ -253,12 +268,22 @@ func drop_object_with_force():
 
 		held_object.reparent(get_tree().root)
 
-		# Apply impulse based on player's facing direction and charge level
-		var throw_direction = -head.global_transform.basis.z
-		held_object.apply_central_impulse(throw_direction * throw_force)
+		# Apply impulse based on player's facing direction and charge level with vertical aim
+		var camera_node = $"Head/Camera3D"
+		var throw_direction = -camera_node.global_transform.basis.z
 
-		# Add some upward force for arc
-		held_object.apply_central_impulse(Vector3.UP * throw_force * 0.3)
+		# Get vertical aim angle for lob/toss mechanics
+		var vertical_aim = camera_node.get_meta("vertical_aim_angle", camera_node.rotation.x)
+
+		# Adjust upward component based on vertical aim
+		var upward_factor = 0.3
+		if vertical_aim < 0:  # Aiming upward - LOB
+			upward_factor = 0.5  # More upward force for high arcs
+		elif vertical_aim > 0:  # Aiming downward - TOSS
+			upward_factor = 0.1  # Less upward force for flat throws
+
+		held_object.apply_central_impulse(throw_direction * throw_force)
+		held_object.apply_central_impulse(Vector3.UP * throw_force * upward_factor)
 
 		held_object = null
 		throw_charge = 0.0

@@ -1,1 +1,1 @@
-Fixed crosshair scaling using proper scale property instead of grow properties
+Added vertical aiming control for lob/toss mechanics
