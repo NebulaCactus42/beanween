@@ -1,1 +1,1 @@
-Fixed crosshair visual feedback using proper ColorRect properties
+Fixed crosshair visual feedback using correct ColorRect grow properties
