@@ -1,1 +1,1 @@
-Added vertical aiming control for lob/toss mechanics
+Enhanced trajectory visualization with throw type differentiation

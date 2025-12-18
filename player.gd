@@ -184,6 +184,9 @@ func update_trajectory_prediction():
 
 	initial_velocity.y = throw_force * upward_factor
 
+	# Store the upward factor for trajectory visualization
+	camera_node.set_meta("upward_factor", upward_factor)
+
 	# Simulate trajectory with physics
 	var current_pos = start_pos
 	var current_velocity = initial_velocity
@@ -229,9 +232,17 @@ func update_trajectory_prediction():
 	trajectory_line.clear_surfaces()
 	trajectory_line.surface_begin(Mesh.PRIMITIVE_LINE_STRIP)
 
-	# Set color based on charge level
+	# Set color based on charge level and throw type
 	var charge_ratio = throw_charge / max_throw_charge
-	var line_color = Color(1, 1 - charge_ratio, 0)  # Red to Yellow
+	var upward_factor = camera_node.get_meta("upward_factor", 0.3)
+
+	var line_color
+	if upward_factor >= 0.4:  # LOB (high upward factor)
+		line_color = Color(1, 1 - charge_ratio * 0.5, 0)  # More red for lobs
+	elif upward_factor <= 0.2:  # TOSS (low upward factor)
+		line_color = Color(1, 1 - charge_ratio * 1.5, 0)  # More yellow for tosses
+	else:  # BALANCED
+		line_color = Color(1, 1 - charge_ratio, 0)  # Standard red to yellow
 
 	for point in trajectory_points:
 		trajectory_line.surface_set_color(line_color)
