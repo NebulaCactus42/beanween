@@ -1,1 +1,1 @@
-Enhanced trajectory visualization with throw type differentiation
+Fixed duplicate variable declaration in trajectory visualization

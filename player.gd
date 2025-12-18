@@ -234,7 +234,7 @@ func update_trajectory_prediction():
 
 	# Set color based on charge level and throw type
 	var charge_ratio = throw_charge / max_throw_charge
-	var upward_factor = camera_node.get_meta("upward_factor", 0.3)
+	# upward_factor is already declared above, just use it
 
 	var line_color
 	if upward_factor >= 0.4:  # LOB (high upward factor)
