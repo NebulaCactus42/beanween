@@ -6,8 +6,21 @@ const JUMP_VELOCITY = 4.5
 const SENSITIVITY = 0.003
 const THROW_BASE_FORCE = 10.0
 const MAX_CHARGE = 2.0
-const CHARGE_RATE = 2
+const CHARGE_STEP = 0.15  # How much each scroll changes charge
 const SPRINT_SPEED_MULTIPLIER = 2.0
+
+# Wind-up animation constants
+const WINDUP_SIDE_OFFSET = 0.4
+const WINDUP_HEIGHT_OFFSET = 0.1
+const WINDUP_PULLBACK = 0.2
+const WINDUP_WRIST_TWIST = 90
+
+# Carry position (lower right, out of crosshair)
+const CARRY_OFFSET = Vector3(0.3, -0.2, -0.4)  # Right, Down, Back
+
+# Upward throw values
+const UPWARD_LOB = 0.5
+const UPWARD_TOSS = 0.1
 
 # --- Nodes ---
 @onready var head = $Head
@@ -19,9 +32,7 @@ const SPRINT_SPEED_MULTIPLIER = 2.0
 
 # --- State ---
 var held_object: RigidBody3D = null
-var is_charging_throw = false
-var throw_charge = 0.0
-var trajectory_line: ImmediateMesh = null
+var throw_charge = 0.0  # Now persistent until thrown
 
 # Object property storage
 var original_state = {}
@@ -36,7 +47,7 @@ func _process(_delta):
 
 func _physics_process(delta):
 	handle_movement(delta)
-	handle_throwing_logic(delta)
+	update_trajectory_display()
 	move_and_slide()
 
 # --- Input Handling ---
@@ -45,12 +56,20 @@ func _unhandled_input(event):
 	if event is InputEventMouseMotion:
 		rotate_camera(event.relative)
 
+	# Left Click: Pick up OR Throw
 	if event.is_action_pressed("mouse1"):
-		if held_object: start_charging()
-		else: pick_up_object()
+		if held_object:
+			execute_throw()
+		else:
+			pick_up_object()
 
-	elif event.is_action_released("mouse1"):
-		if is_charging_throw: execute_throw()
+	# Mouse Wheel: Adjust throw power
+	if event is InputEventMouseButton:
+		if held_object:
+			if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+				adjust_charge(CHARGE_STEP)
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+				adjust_charge(-CHARGE_STEP)
 
 func rotate_camera(relative):
 	head.rotate_y(-relative.x * SENSITIVITY)
@@ -63,11 +82,13 @@ func pick_up_object():
 	if not ray.is_colliding(): return
 	var obj = ray.get_collider()
 
-	if obj is RigidBody3D and obj != get_last_slide_collision():
+	if obj is RigidBody3D:
 		hold_object(obj)
 
 func hold_object(obj):
 	held_object = obj
+	throw_charge = 1.0  # Start at half power
+	
 	# Store state for restoration
 	original_state = {
 		"layer": obj.collision_layer,
@@ -80,12 +101,15 @@ func hold_object(obj):
 	obj.collision_layer = 0
 	obj.collision_mask = 0
 	obj.reparent(hand)
-	obj.position = Vector3.ZERO
+	# Position object to the lower right, out of crosshair view
+	obj.position = CARRY_OFFSET
 	obj.linear_velocity = Vector3.ZERO
 
 func release_object() -> RigidBody3D:
+	if not held_object: return null
 	var obj = held_object
 	obj.reparent(get_tree().current_scene)
+	obj.global_position = hand.global_position
 
 	# Restore physics
 	obj.collision_layer = original_state.layer
@@ -96,34 +120,41 @@ func release_object() -> RigidBody3D:
 	obj.sleeping = false
 
 	held_object = null
+	original_state.clear()
 	return obj
 
 # --- Throwing Logic ---
 
-func start_charging():
-	is_charging_throw = true
-	throw_charge = 0.0
+func adjust_charge(delta: float):
+	throw_charge = clamp(throw_charge + delta, 0.0, MAX_CHARGE)
 
-func handle_throwing_logic(delta):
-	if is_charging_throw and held_object:
-		throw_charge = min(throw_charge + CHARGE_RATE * delta, MAX_CHARGE)
-		
-		# Pass global hand position and the calculated velocity
-		trajectory_predictor.update_path(hand.global_position, calculate_throw_velocity(), -9.8, 0.05, held_object)
+func update_trajectory_display():
+	if held_object:
+		# Continuously show trajectory based on current charge
+		trajectory_predictor.update_path(
+			hand.global_position, 
+			calculate_throw_velocity(), 
+			get_gravity().y, 
+			0.05, 
+			held_object
+		)
 	else:
 		trajectory_predictor.clear()
-		clear_trajectory()
 
 func execute_throw():
+	if not held_object: return
+	
 	var impulse = calculate_throw_velocity()
 	var obj = release_object()
 	obj.apply_central_impulse(impulse)
-	is_charging_throw = false
+	
+	# Reset charge for next pickup
+	throw_charge = 0.0
 
 func calculate_throw_velocity() -> Vector3:
 	var dir = -camera.global_transform.basis.z
 	var force = max(THROW_BASE_FORCE * throw_charge, 5.0)
-	var upward = 0.5 if camera.rotation.x < 0 else 0.1 # Lob vs Toss
+	var upward = UPWARD_LOB if camera.rotation.x < 0 else UPWARD_TOSS  # Lob vs Toss
 	return (dir * force) + (Vector3.UP * force * upward)
 
 # --- Movement & Physics Helpers ---
@@ -151,47 +182,35 @@ func handle_movement(delta):
 # --- Visuals ---
 
 func update_visuals():
-	if is_charging_throw and held_object:
-		# ratio goes from 0.0 to 1.0 as the throw charges
+	if held_object:
+		# Charge ratio (0.0 to 1.0)
 		var ratio = throw_charge / MAX_CHARGE
 		
 		# --- 1. Ball Orientation Correction ---
-		# We want the ball to face 'forward' (90 deg) regardless of how it was grabbed.
-		# Adjust 'Vector3.UP' or '90' if your model's nose points a different way.
-		var target_rotation = Basis().rotated(Vector3.UP, deg_to_rad(0))
+		var target_rotation = Basis.IDENTITY
 		held_object.basis = held_object.basis.slerp(target_rotation, ratio)
 
 		# --- 2. Hand Position (The Wind-up) ---
-		# Default resting position is (0, 0, -0.4)
-		hand.position.x = ratio * 0.4         # Shifts slightly right (sidearm)
-		hand.position.y = ratio * 0.1         # Raises ball toward eye level
-		hand.position.z = -0.4 + (ratio * 0.2) # Pulls back toward the player (lower = less pullback)
+		# Interpolate from carry position to wind-up position
+		var windup_pos = Vector3(
+			CARRY_OFFSET.x + (ratio * WINDUP_SIDE_OFFSET),      # More to the right
+			CARRY_OFFSET.y + (ratio * WINDUP_HEIGHT_OFFSET),    # Raises up
+			CARRY_OFFSET.z + (ratio * WINDUP_PULLBACK)          # Pulls back
+		)
+		hand.position = hand.position.lerp(windup_pos, 0.15)
 		
 		# --- 3. Hand Rotation (The Cocking Motion) ---
-		hand.rotation.y = deg_to_rad(ratio * 90) # Twists wrist outward
-		hand.rotation.x = deg_to_rad(ratio * 0) # Tilts nose of the ball up slightly
+		hand.rotation.y = deg_to_rad(ratio * WINDUP_WRIST_TWIST)
+		hand.rotation.x = deg_to_rad(ratio * -2)
 		
 		# --- 4. UI Feedback ---
 		crosshair.scale = Vector2.ONE * (1.0 + ratio)
-		crosshair.color = Color(1, 1 - ratio, 0) # Fades from yellow to red
+		crosshair.color = Color(1, 1 - ratio, 0)  # Yellow to red gradient
 	else:
-		# Smoothly interpolate back to the default "carrying" position when not charging
-		hand.position = hand.position.lerp(Vector3(0, 0, -0.4), 0.2)
+		# Smoothly return to idle position
+		hand.position = hand.position.lerp(CARRY_OFFSET, 0.2)
 		hand.rotation = hand.rotation.lerp(Vector3.ZERO, 0.2)
 		
-		# Reset Crosshair
+		# Reset crosshair
 		crosshair.scale = Vector2.ONE
 		crosshair.color = Color.RED if ray.is_colliding() else Color.WHITE
-
-
-# --- Trajectory (Simplified for refactor) ---
-
-func update_trajectory():
-	var start_pos = hand.global_position
-	var initial_vel = calculate_throw_velocity()
-	var gravity = get_gravity()
-	trajectory_predictor.update_path(start_pos, initial_vel, gravity)
-
-func clear_trajectory():
-
-	trajectory_predictor.clear()
