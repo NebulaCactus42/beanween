@@ -7,6 +7,7 @@ const SENSITIVITY = 0.003
 const THROW_BASE_FORCE = 10.0
 const MAX_CHARGE = 2.0
 const CHARGE_RATE = 2
+const SPRINT_SPEED_MULTIPLIER = 2.0
 
 # --- Nodes ---
 @onready var head = $Head
@@ -138,8 +139,11 @@ func handle_movement(delta):
 	var direction = (head.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		var current_speed = SPEED
+		if Input.is_action_pressed("sprint"):
+			current_speed *= SPRINT_SPEED_MULTIPLIER
+		velocity.x = direction.x * current_speed
+		velocity.z = direction.z * current_speed
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)

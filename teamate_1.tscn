@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://c7v570uf02svp"]
+
+[ext_resource type="Texture2D" uid="uid://dwyl8ivhkxtdm" path="res://assets/textures/player2d.png" id="1_stgor"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_n6dsc"]
+radius = 0.5566406
+height = 1.7336426
+
+[node name="teamate1" type="Node3D"]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.008911133, 0)
+shape = SubResource("CapsuleShape3D_n6dsc")
+
+[node name="Sprite3D" type="Sprite3D" parent="RigidBody3D"]
+transform = Transform3D(0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)
+billboard = 2
+texture = ExtResource("1_stgor")

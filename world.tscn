@@ -1,6 +1,7 @@
-[gd_scene load_steps=16 format=3 uid="uid://c0h1qystueq87"]
+[gd_scene load_steps=17 format=3 uid="uid://c0h1qystueq87"]
 
 [ext_resource type="Texture2D" uid="uid://cpu7yasg3qsa0" path="res://assets/textures/rocky_terrain_02_spec_4k.png" id="1_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://c7v570uf02svp" path="res://teamate_1.tscn" id="1_dwbse"]
 [ext_resource type="PackedScene" uid="uid://bow6bv4aoykxt" path="res://football.tscn" id="1_f3sb7"]
 [ext_resource type="PackedScene" uid="uid://biaiyrk746l41" path="res://street_lamp.tscn" id="1_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://b61rvhe1hf30w" path="res://lamppost.tscn" id="1_tlwt5"]
@@ -59,6 +60,9 @@ metallic = 1.0
 roughness = 0.2
 
 [node name="Floor" type="StaticBody3D"]
+
+[node name="teamate1" parent="." instance=ExtResource("1_dwbse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8647718, 2.2263637, -2.9105759)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_7dm0k")
