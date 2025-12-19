@@ -1,6 +1,7 @@
-[gd_scene load_steps=4 format=3 uid="uid://c1c8mpnsxwl4e"]
+[gd_scene load_steps=5 format=3 uid="uid://c1c8mpnsxwl4e"]
 
 [ext_resource type="Script" uid="uid://djvs2mj1nts7u" path="res://player.gd" id="1_4flbx"]
+[ext_resource type="PackedScene" uid="uid://drptdtj6lf6au" path="res://trajectory_line.tscn" id="2_traj"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 radius = 0.4
@@ -26,6 +27,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 spring_length = 3.0
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+fov = 95.0
 
 [node name="InteractionRay" type="RayCast3D" parent="Head/Camera3D"]
 target_position = Vector3(0, 0, -2)
@@ -34,7 +36,10 @@ target_position = Vector3(0, 0, -2)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
 
 [node name="Hand" type="Node3D" parent="Head/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.3, -0.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.3, -1.9599395)
+
+[node name="TrajectoryLine" parent="." instance=ExtResource("2_traj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.3, -0.4)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

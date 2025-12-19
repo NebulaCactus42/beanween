@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://drptdtj6lf6au"]
+
+[ext_resource type="Script" uid="uid://bs24n4y64qhyq" path="res://trajectory_predictor.gd" id="1_abcde"]
+
+[sub_resource type="ImmediateMesh" id="ImmediateMesh_1"]
+
+[node name="TrajectoryLine" type="MeshInstance3D"]
+mesh = SubResource("ImmediateMesh_1")
+script = ExtResource("1_abcde")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]

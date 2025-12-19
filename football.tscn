@@ -1,0 +1,57 @@
+[gd_scene load_steps=9 format=3 uid="uid://bow6bv4aoykxt"]
+
+[ext_resource type="PackedScene" uid="uid://r17w6w8vg8nb" path="res://assets/american_football_4k.blend" id="2_75h58"]
+[ext_resource type="Script" uid="uid://cxqbe4ptauj7o" path="res://ground_marker.gd" id="Script_ground_marker"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bw4sc"]
+radius = 0.12792969
+height = 0.46411133
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cube_dust"]
+emission_shape = 3
+emission_box_extents = Vector3(0.25, 0.25, 0.25)
+initial_velocity_min = 0.01
+initial_velocity_max = 0.05
+gravity = Vector3(0, -0.02, 0)
+damping_min = 0.1
+damping_max = 0.2
+scale_min = 0.01
+scale_max = 0.03
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cube_mote"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 1, 1, 0.15)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cube_dust"]
+material = SubResource("StandardMaterial3D_cube_mote")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+transparency = 2
+alpha_scissor_threshold = 0.5
+alpha_antialiasing_mode = 0
+albedo_color = Color(0, 0, 1, 0.5)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_marker"]
+material = SubResource("StandardMaterial3D_marker")
+top_radius = 0.3
+bottom_radius = 0.3
+height = 0.01
+
+[node name="Football" type="RigidBody3D"]
+
+[node name="american_football_4k" parent="." instance=ExtResource("2_75h58")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.00012207031, 5.3343996e-12, 0)
+shape = SubResource("CapsuleShape3D_bw4sc")
+
+[node name="CubeDustMotes" type="GPUParticles3D" parent="."]
+amount = 40
+process_material = SubResource("ParticleProcessMaterial_cube_dust")
+draw_pass_1 = SubResource("BoxMesh_cube_dust")
+
+[node name="GroundMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("CylinderMesh_marker")
+script = ExtResource("Script_ground_marker")
