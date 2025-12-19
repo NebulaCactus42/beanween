@@ -1,11 +1,16 @@
-[gd_scene load_steps=13 format=3 uid="uid://c0h1qystueq87"]
+[gd_scene load_steps=16 format=3 uid="uid://c0h1qystueq87"]
 
+[ext_resource type="Texture2D" uid="uid://cpu7yasg3qsa0" path="res://assets/textures/rocky_terrain_02_spec_4k.png" id="1_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://bow6bv4aoykxt" path="res://football.tscn" id="1_f3sb7"]
 [ext_resource type="PackedScene" uid="uid://biaiyrk746l41" path="res://street_lamp.tscn" id="1_fj7yv"]
 [ext_resource type="PackedScene" uid="uid://b61rvhe1hf30w" path="res://lamppost.tscn" id="1_tlwt5"]
+[ext_resource type="PackedScene" uid="uid://vrq0bt8hsmbt" path="res://barrel.tscn" id="6_dwbse"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_7dm0k"]
 size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_036b0"]
+albedo_texture = ExtResource("1_aqk2v")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
 albedo_color = Color(0.1, 0.1, 0.12, 1)
@@ -59,6 +64,7 @@ roughness = 0.2
 shape = SubResource("BoxShape3D_7dm0k")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_036b0")
 mesh = SubResource("BoxMesh_ig7tw")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -98,4 +104,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1, 3)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.8364623, 3)
 
 [node name="Football3" parent="." instance=ExtResource("1_f3sb7")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5423138, 3.6544838)
+transform = Transform3D(0.12756668, 0, 0.99183, 0, 1, 0, -0.99183, 0, 0.12756668, -0.24031353, 1.5423138, -0.51117873)
+
+[node name="barrel" parent="." instance=ExtResource("6_dwbse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8647718, 0.5, -1.7701453)

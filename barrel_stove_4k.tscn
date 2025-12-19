@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://bncmidh5bje4v"]
+
+[ext_resource type="PackedScene" uid="uid://ofobq6j4jgu2" path="res://assets/barrel_stove_4k.blend" id="1_b32xt"]
+[ext_resource type="Script" uid="uid://0adi41ocorjs" path="res://barrel_stove_4k.gd" id="2_4un5y"]
+
+[node name="barrel_stove_4k" instance=ExtResource("1_b32xt")]
+script = ExtResource("2_4un5y")

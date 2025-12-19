@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://bow6bv4aoykxt"]
 
-[ext_resource type="PackedScene" uid="uid://r17w6w8vg8nb" path="res://assets/american_football_4k.blend" id="2_75h58"]
+[ext_resource type="PackedScene" uid="uid://cjtkaoynx13i2" path="res://american_football_4k.tscn" id="1_75h58"]
 [ext_resource type="Script" uid="uid://cxqbe4ptauj7o" path="res://ground_marker.gd" id="Script_ground_marker"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_bw4sc"]
@@ -41,7 +41,7 @@ height = 0.01
 
 [node name="Football" type="RigidBody3D"]
 
-[node name="american_football_4k" parent="." instance=ExtResource("2_75h58")]
+[node name="american_football_4k2" parent="." instance=ExtResource("1_75h58")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(-4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0, 1, 0.00012207031, 5.3343996e-12, 0)
