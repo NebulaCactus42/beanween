@@ -6,7 +6,7 @@ const JUMP_VELOCITY = 4.5
 const SENSITIVITY = 0.003
 const THROW_BASE_FORCE = 10.0
 const MAX_CHARGE = 2.0
-const CHARGE_RATE = 1.5
+const CHARGE_RATE = 2
 
 # --- Nodes ---
 @onready var head = $Head
@@ -159,13 +159,13 @@ func update_visuals():
 
 		# --- 2. Hand Position (The Wind-up) ---
 		# Default resting position is (0, 0, -0.4)
-		hand.position.x = ratio * 0.3          # Shifts slightly right (to the "shoulder")
-		hand.position.y = ratio * 0.15         # Raises ball toward eye level
+		hand.position.x = ratio * 0.4         # Shifts slightly right (sidearm)
+		hand.position.y = ratio * 0.1         # Raises ball toward eye level
 		hand.position.z = -0.4 + (ratio * 0.2) # Pulls back toward the player (lower = less pullback)
 		
 		# --- 3. Hand Rotation (The Cocking Motion) ---
-		hand.rotation.y = deg_to_rad(ratio * 45) # Twists wrist outward
-		hand.rotation.x = deg_to_rad(ratio * 15) # Tilts nose of the ball up slightly
+		hand.rotation.y = deg_to_rad(ratio * 90) # Twists wrist outward
+		hand.rotation.x = deg_to_rad(ratio * 0) # Tilts nose of the ball up slightly
 		
 		# --- 4. UI Feedback ---
 		crosshair.scale = Vector2.ONE * (1.0 + ratio)
